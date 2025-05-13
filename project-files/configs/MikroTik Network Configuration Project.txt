@@ -1,0 +1,315 @@
+                                                                                                                    
+
+
+                                                                                                           MikroTik Network Configuration Project
+
+
+
+This project represents an extended network configured using MikroTik routers.
+
+It includes the setup of 8 routers, dynamic routing using the RIP protocol, VLAN segmentation, and DHCP services across multiple segments.
+Main Features:
+Number of Routers: 8 MikroTik routers, each with a specific role in the network.
+
+(Routing Protocol: RIP (with passive mode enabled on non-router-facing interfaces).
+
+VLANs: Some routers are configured with multiple VLANs for internal network segmentation.
+
+DHCP: Multiple DHCP servers configured to automatically assign IP addresses.
+
+IP Addressing: Each router has its own IP ranges with gateways and DNS servers set.
+
+Router Roles Overview:
+Router1 - Router3: Handle inter-subnet routing and internal router connections.
+
+Router4 & Router7: Support multiple VLANs with separate DHCP servers per VLAN.
+
+Router5 - Router8: Manage routing between subnets and inter-router communication.
+
+Configuration Includes:
+Assigning IP addresses to interfaces.
+
+Enabling RIP routing on proper interfaces.
+
+Creating IP pools and setting up DHCP servers.
+
+Setting up VLANs using interface vlan.
+
+Removing DHCP clients to prevent conflicts.
+____________________________________________________________________________________________________________________________________________________________________________________________
+
+*router1*
+system identity set name=router1
+ip address add address=10.1.0.254/22 interface=ether1
+ip address add address=192.168.0.1/24 interface=ether2
+ip address add address=192.168.2.1/24 interface=ether3
+ip address add address=192.168.1.1/24 interface=ether4
+ip address print
+
+routing rip instance add name="router1-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template add interface=ether4
+
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.1.0.1-10.1.0.253
+ip pool print
+
+ip dhcp-server add interface=ether1 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.1.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.1.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+______________________________________________________________________________________________________________________________________________________________________________________________
+
+*router2*
+
+system identity set name=router2
+ip address add address=10.2.0.254/22 interface=ether1
+ip address add address=192.168.0.2/24 interface=ether2
+ip address add address=192.168.3.1/24 interface=ether3
+ip address add address=192.168.4.1/24 interface=ether4
+ip address print
+
+routing rip instance add name="router2-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.2.0.1-10.2.0.253
+ip pool print
+
+ip dhcp-server add interface=ether1 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.2.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.2.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+
+
+*router3*
+
+system identity set name=router3
+ip address add address=10.3.0.254/22 interface=ether1
+ip address add address=192.168.5.1/24 interface=ether2
+ip address add address=192.168.2.2/24 interface=ether3
+ip address add address=192.168.4.2/24 interface=ether4
+ip address print
+
+routing rip instance add name="router3-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template add interface=ether4 
+
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.3.0.1-10.3.0.253
+ip pool print
+
+ip dhcp-server add interface=ether1 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.3.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.3.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+
+
+*router4*
+interface vlan add name=vlan10 vlan-id=10 interface=ether1 disabled=no
+interface vlan add name=vlan20 vlan-id=20 interface=ether1 disabled=no
+interface vlan print
+interface print
+ 
+system identity set name=router4
+ip address add address=10.20.0.254/22 interface=vlan10
+ip address add address=10.21.0.254/22 interface=vlan20
+ip address add address=192.168.6.1/24 interface=ether2
+ip address add address=192.168.3.2/24 interface=ether3
+ip address add address=192.168.7.1/24 interface=ether4
+ip address print
+
+routing rip instance add name="router4-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template add interface=ether4
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.20.0.1-10.20.0.253
+ip pool print
+
+ip dhcp-server add interface=vlan10 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip pool add name=pool2 ranges=10.21.0.1-10.21.0.253
+ip pool print
+
+ip dhcp-server add interface=vlan20 address-pool=pool2 lease-time=24h name=dhcp2 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.20.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.20.0.254
+ip dhcp-server network print
+
+ip dhcp-server network add address=10.21.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.21.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+____________________________________________________________________________________________________________________________________________________________________________________________router5
+
+system identity set name=router5
+ip address add address=10.5.0.254/22 interface=ether1
+ip address add address=192.168.5.2/24 interface=ether2
+ip address add address=192.168.8.1/24 interface=ether3
+ip address add address=192.168.7.2/24 interface=ether4
+ip address print
+
+routing rip instance add name="router5-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template add interface=ether4 
+
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.5.0.1-10.5.0.253
+ip pool print
+
+ip dhcp-server add interface=ether1 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.5.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.5.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+router6
+
+system identity set name=router6
+ip address add address=10.6.0.254/22 interface=ether1
+ip address add address=192.168.11.1/24 interface=ether2
+ip address add address=192.168.6.2/24 interface=ether3
+ip address add address=192.168.9.2/24 interface=ether4
+ip address print
+
+routing rip instance add name="router6-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template add interface=ether4 
+
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.6.0.1-10.6.0.253
+ip pool print
+
+ip dhcp-server add interface=ether1 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.6.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.6.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+
+*router7*
+interface vlan add name=vlan30 vlan-id=30 interface=ether1 disabled=no
+interface vlan add name=vlan40 vlan-id=40 interface=ether1 disabled=no
+interface vlan print
+interface print
+ 
+system identity set name=router7
+ip address add address=10.30.0.254/22 interface=vlan30
+ip address add address=10.31.0.254/22 interface=vlan40
+ip address add address=192.168.8.2/24 interface=ether2
+ip address add address=192.168.10.1/24 interface=ether3
+ip address add address=192.168.9.1/24 interface=ether4
+ip address print
+
+routing rip instance add name="router7-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template add interface=ether4
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.30.0.1-10.30.0.253
+ip pool print
+
+ip dhcp-server add interface=vlan30 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip pool add name=pool2 ranges=10.31.0.1-10.31.0.253
+ip pool print
+
+ip dhcp-server add interface=vlan40 address-pool=pool2 lease-time=24h name=dhcp2 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.30.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.30.0.254
+ip dhcp-server network print
+
+ip dhcp-server network add address=10.31.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.31.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+
+____________________________________________________________________________________________________________________________________________________________________________________________
+router8
+
+system identity set name=router8
+ip address add address=10.8.0.254/22 interface=ether1
+ip address add address=192.168.11.2/24 interface=ether2
+ip address add address=192.168.10.2/24 interface=ether3
+ip address add address=192.168.1.2/24 interface=ether4
+ip address print
+
+routing rip instance add name="router8-instance" redistribute=connected,rip route-timeout=30 route-gc-timeout=30 update-interval=15
+routing rip interface-template add interface=ether1 mode=passive
+routing rip interface-template add interface=ether2 
+routing rip interface-template add interface=ether3 
+routing rip interface-template add interface=ether4 
+
+routing rip interface-template print
+
+ip pool add name=pool1 ranges=10.8.0.1-10.8.0.253
+ip pool print
+
+ip dhcp-server add interface=ether1 address-pool=pool1 lease-time=24h name=dhcp1 disabled=no
+ip dhcp-server print
+
+ip dhcp-server network add address=10.8.0.0/22 dns-server=8.8.8.8,8.8.4.4 gateway=10.8.0.254
+ip dhcp-server network print
+
+ip dhcp-client print
+ip dhcp-client remove [find]
+
+
+
+
+
+
